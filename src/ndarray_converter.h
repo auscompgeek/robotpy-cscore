@@ -2,7 +2,7 @@
 # define __NDARRAY_CONVERTER_H__
 
 #include <Python.h>
-#include <opencv2/core/core.hpp>
+#include <opencv2/core/mat.hpp>
 
 
 class NDArrayConverter {

@@ -95,18 +95,14 @@ def has_flag(compiler, flagname):
 
 
 def cpp_flag(compiler):
-    """Return the -std=c++[11/14] compiler flag.
+    """Return the -std=c++14 compiler flag.
 
-    The c++14 is preferred over c++11 (when it is available).
+    This ensures that the compiler actually supports C++14.
+    Attempts to give a friendly error message otherwise.
     """
     if has_flag(compiler, "-std=c++14"):
         return "-std=c++14"
-    elif has_flag(compiler, "-std=c++11"):
-        return "-std=c++11"
-    else:
-        raise RuntimeError(
-            "Unsupported compiler -- at least C++11 support " "is needed!"
-        )
+    raise RuntimeError("Unsupported compiler -- at least C++14 support is needed!")
 
 
 class BuildExt(build_ext):
@@ -127,7 +123,7 @@ class BuildExt(build_ext):
                 opts.append("-s")  # strip
                 opts.append("-g0")  # remove debug symbols
             else:
-                opts.append("-O0")
+                opts.append("-Og")
             opts.append(cpp_flag(self.compiler))
             if has_flag(self.compiler, "-fvisibility=hidden"):
                 opts.append("-fvisibility=hidden")
@@ -154,7 +150,6 @@ def get_cscore_sources(d):
         l.extend(glob.glob(d + "/osx/*.cpp"))
     else:
         l.extend(glob.glob(d + "/linux/*.cpp"))
-    print(l)
     return l
 
 
@@ -248,7 +243,8 @@ setup(
     packages=find_packages(),
     ext_modules=ext_modules,
     install_requires=["numpy", "pynetworktables"],
-    license="BSD",
+    python_requires=">= 3.5",
+    license="BSD-3-Clause",
     zip_safe=False,
     cmdclass={"build_ext": BuildExt},
     entry_points={"robotpylib": ["info = cscore._info:Info"]},
