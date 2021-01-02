@@ -1,0 +1,35 @@
+---
+name: CI (conda-forge)
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      matrix:
+        os: [ubuntu, macos, windows]
+        python-version: [3.7, 3.8, 3.9]
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          submodules: true
+
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+          channels: conda-forge
+
+      - run: conda install opencv pkgconfig
+      - run: python setup.py bdist_wheel -d dist
+      - run: python -m pip install dist/*.whl
+      - run: python -m cscore --help
+
+      - uses: actions/upload-artifact@v1
+        with:
+          name: dist-py${{ matrix.python-version }}-${{ matrix.os }}
+          path: dist
