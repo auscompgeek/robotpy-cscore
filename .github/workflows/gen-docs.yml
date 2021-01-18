@@ -1,0 +1,28 @@
+---
+name: Gen C++ docs
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Install apt dependencies
+        run: |
+          sudo apt-get install --no-install-recommends -y \
+            libopencv-dev python3-opencv
+
+      - name: Install requirements
+        run: python3 -m pip install setuptools wheel pkgconfig -r docs/requirements.txt
+
+      - run: python3 setup.py develop
+
+      - run: python3 docs/gencpp.py
+
+      - uses: github-actions-x/commit@v2.7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'Regenerate _cscore docs'
+          files: docs/objects.rst
+          name: 'github-actions[bot]'
